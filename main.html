@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Walentynki</title>
+</head>
+<body>
+    <div class="Main">
+        <h1>Czy Bedziesz Moja Walentynka?</h1>
+        <img src="kwiatki.jpg" alt="Walentynki Image">
+        <div class="Buttons">
+            <button class="YesButton">TAK</button>
+            <button class="NoButton">NIE</button>
+        </div>
+    </div>
+</body>
+</html>
+<style> 
+    @keyframes slideBackground {
+        0% {
+            background-position: 0 0;
+        }
+        100% {
+            background-position: 200px 200px;
+        }
+    }
+
+    body {
+        background: linear-gradient(0deg, #ffe6f0 0%, #ffb3d9 50%, #ff99cc 100%);
+        font-family: 'Arial', sans-serif;
+        text-align: center;
+        padding: 50px;
+        position: relative;
+        min-height: 100vh;
+    }
+
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: 
+            url('image1.jpg'),
+            url('image2.jpg');
+        background-size: 100px 100px, 100px 100px;
+        background-position: 0 0, 50px 50px;
+        background-repeat: repeat;
+        spacing: 50px;
+        animation: slideBackground 10s linear infinite;
+        pointer-events: none;
+        opacity: 0.3;
+        z-index: 0;
+    }
+
+    .Main {
+        position: relative;
+        z-index: 1;
+    }
+
+    .Main h1 {
+        color: #ff0066;
+        font-size: 3em;
+        margin-bottom: 20px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .Main img {
+        width: 200px;
+        height: auto;
+        margin-bottom: 30px;
+        border-radius: 15px;
+    }
+
+    .Buttons {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        align-items: center;
+    }
+
+    .YesButton, .NoButton {
+        width: 180px;              /* fixed width so other button won't move */
+        max-width: 220px;
+        box-sizing: border-box;
+        white-space: normal;       /* allow wrapping */
+        overflow-wrap: break-word;
+        word-break: break-word;
+        text-align: center;
+        background-color: #ff66a3;
+        border: none;
+        color: white;
+        padding: 15px 12px;       /* adjusted padding to fit wrapped text */
+        font-size: 1.1em;         /* base font-size (no hover-change) */
+        border-radius: 10px;
+        cursor: pointer;
+        transition: transform 180ms ease, background-color 180ms ease;
+        transform-origin: center center;
+    }
+
+    /* New styles for YesButton */
+    .YesButton {
+      transition: transform 180ms ease, background 180ms ease, box-shadow 180ms ease;
+      box-shadow: 0 0 8px rgba(136,248,45,0.12);
+      background: linear-gradient(180deg, #ff66a3 0%, #ff3388 100%);
+    }
+
+    /* Use transform for hover so text size doesn't reflow layout */
+    .YesButton:hover,
+    .NoButton:hover {
+        transform: scale(1.08);
+    }
+</style>
+<script>
+const yes = document.querySelector('.YesButton');
+const no = document.querySelector('.NoButton');
+
+let yesScale = 1;
+let noScale = 1;
+const STEP = 0.12;
+const MIN = 0.6;
+const MAX = 2.0;
+
+// glow state for Yes button
+let yesGlow = 0;               // 0..1
+const GLOW_STEP = 0.18;
+const GLOW_MAX = 1.0;
+
+function applyScale() {
+  yes.style.transform = `scale(${yesScale})`;
+  no.style.transform = `scale(${noScale})`;
+}
+
+function updateYesGlow() {
+  const i = Math.min(1, Math.max(0, yesGlow));
+  const blur = 8 + i * 80;                              // bigger step for blur
+  const alpha = 0.12 + i * 0.6;                         // shadow alpha
+  yes.style.boxShadow = `0 0 ${blur}px rgba(136,248,45,${alpha})`;
+
+  // interpolate from pink to green
+  const r = Math.round(255 - i * (255 - 136));
+  const g = Math.round(102 + i * (248 - 102));
+  const b = Math.round(163 - i * (163 - 45));
+  yes.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+}
+
+// ensure initial appearance
+updateYesGlow();
+
+yes.addEventListener('click', () => {
+  // keep the scale effect
+  noScale = Math.min(MAX, noScale + STEP);
+  yesScale = Math.max(MIN, yesScale - STEP);
+  applyScale();
+
+  // navigate to the "ez" subsite after a short delay (200ms)
+  setTimeout(() => {
+    window.location.href = 'ez.html'; // change to 'ez/index.html' or 'ez.html' if needed
+  }, 200);
+});
+
+// preset texts for the NIE button — replace with your strings
+const noTexts = [
+  "Milo by bylo gdybys powiedziala tak",
+  "Dobra naprawde milo by bylo",
+  "Masz obok ogromny przycik tak, moze go nacisnij?",
+  "Dobra ej teraz mi jest przykro",
+  "Ladnie Poprosze??"
+  
+];
+let noIndex = 0;
+
+// update the existing no click handler to also change its text
+no.addEventListener('click', () => {
+  if (no.disabled) return;
+
+  // scale behavior
+  yesScale = Math.min(MAX, yesScale + STEP);
+  noScale = Math.max(MIN, noScale - STEP);
+  applyScale();
+
+  // show next preset text
+  no.textContent = noTexts[noIndex];
+  noIndex++;
+
+  // disable button once we've shown the last text
+  if (noIndex >= noTexts.length) {
+    no.disabled = true;
+    no.style.opacity = '0.7';
+    no.style.cursor = 'default';
+  }
+
+  if (yesGlow < GLOW_MAX) {
+    yesGlow = Math.min(GLOW_MAX, yesGlow + GLOW_STEP);
+    updateYesGlow();
+  }
+});
+</script>
